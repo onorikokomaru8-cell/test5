@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>タイプ診断テスト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0b0f;
+    --bg2: #151219;
+    --gold: #c9a96e;
+    --gold-light: #e8d5a3;
+    --rose: #c96e8a;
+    --text: #f0ece4;
+    --text-muted: #8a8078;
+    --border: rgba(201,169,110,0.2);
+    --card: rgba(255,255,255,0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  /* 背景装飾 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(201,169,110,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(201,110,138,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 540px;
+    padding: 24px 16px;
+  }
+
+  /* ===== 画面切り替え ===== */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.5s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== TOP画面 ===== */
+  .top-header {
+    text-align: center;
+    padding: 48px 0 40px;
+  }
+
+  .top-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .top-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(28px, 7vw, 40px);
+    font-weight: 800;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .top-title span {
+    color: var(--gold);
+  }
+
+  .top-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 40px;
+  }
+
+  .btn-start {
+    display: inline-block;
+    padding: 16px 48px;
+    background: linear-gradient(135deg, var(--gold) 0%, #a8803a 100%);
+    color: #0d0b0f;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    border: none;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 24px rgba(201,169,110,0.3);
+  }
+
+  .btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(201,169,110,0.4);
+  }
+
+  /* ===== 質問画面 ===== */
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px 32px;
+    margin: 24px 0;
+  }
+
+  .question-num {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .question-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(18px, 5vw, 24px);
+    font-weight: 600;
+    line-height: 1.7;
+    margin-bottom: 36px;
+    color: var(--text);
+  }
+
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .choice-btn {
+    padding: 18px 24px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .choice-btn::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.4;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+  }
+
+  .choice-btn:hover {
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.06);
+    transform: translateX(4px);
+  }
+
+  .choice-btn:hover::before {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+
+  /* ===== メール登録画面 ===== */
+  .email-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px 32px;
+    margin: 24px 0;
+    text-align: center;
+  }
+
+  .email-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, rgba(201,169,110,0.15), rgba(201,169,110,0.05));
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 22px;
+  }
+
+  .email-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--gold-light);
+  }
+
+  .email-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+
+  /* アスメルフォーム */
+  .asmeru-form-wrap {
+    margin-bottom: 20px;
+  }
+
+  .asmeru-form-wrap fieldset {
+    border: none;
+    padding: 0;
+  }
+
+  .asmeru-form-wrap label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-align: left;
+  }
+
+  .asmeru-form-wrap .require {
+    color: var(--rose);
+    margin-left: 4px;
+  }
+
+  .asmeru-form-wrap input[type="email"] {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .asmeru-form-wrap input[type="email"]:focus {
+    border-color: var(--gold);
+  }
+
+  .asmeru-form-wrap input[type="email"]::placeholder {
+    color: var(--text-muted);
+  }
+
+  .asmeru-form-wrap .center-text {
+    text-align: center;
+  }
+
+  .asmeru-form-wrap input[type="submit"] {
+    padding: 14px 40px;
+    background: linear-gradient(135deg, var(--gold) 0%, #a8803a 100%);
+    color: #0d0b0f;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(201,169,110,0.25);
+  }
+
+  .asmeru-form-wrap input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(201,169,110,0.4);
+  }
+
+  .skip-btn {
+    background: none;
+    border: none;
+    color: var(--gold-light);
+    font-size: 36px;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 12px 8px;
+    transition: color 0.2s;
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 600;
+  }
+
+  .skip-btn:hover { color: var(--gold); }
+
+  /* ===== 結果画面 ===== */
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 48px 32px;
+    margin: 24px 0;
+    text-align: center;
+  }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .result-type {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(36px, 10vw, 56px);
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .result-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    margin-bottom: 32px;
+  }
+
+  .result-divider {
+    width: 40px;
+    height: 1px;
+    background: var(--border);
+    margin: 0 auto 28px;
+  }
+
+  .result-desc {
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--text);
+    text-align: left;
+  }
+
+  .btn-retry {
+    display: inline-block;
+    margin-top: 32px;
+    padding: 12px 32px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    background: none;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.25s ease;
+    letter-spacing: 0.1em;
+  }
+
+  .btn-retry:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* ===== ステップ表示 ===== */
+  .step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .step-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.3s ease;
+  }
+
+  .step-dot.active {
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(201,169,110,0.5);
+  }
+
+  .step-dot.done {
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  /* ===== 注意書き ===== */
+  .notice {
+    background: rgba(201,169,110,0.05);
+    border: 1px solid rgba(201,169,110,0.15);
+    border-radius: 2px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  @media (max-width: 480px) {
+    .question-card, .email-card, .result-card { padding: 28px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ステップインジケーター -->
+  <div class="step-indicator" id="stepIndicator">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
+
+  <!-- ① TOP画面 -->
+  <div class="screen active" id="screen-top">
+    <div class="top-header">
+      <span class="top-label">Partnership Type</span>
+      <h1 class="top-title">あなたの<span>タイプ</span>を<br>診断する</h1>
+      <p class="top-desc">1問の質問であなたの<br>パートナーシップタイプがわかります。</p>
+      <button class="btn-start" onclick="goTo('question')">診断をはじめる</button>
+    </div>
+  </div>
+
+  <!-- ② 質問画面 -->
+  <div class="screen" id="screen-question">
+    <div class="question-card">
+      <span class="question-num">Q 01 / 01</span>
+      <p class="question-text">あなたはどちらが好きですか？</p>
+      <div class="choices">
+        <button class="choice-btn" onclick="selectAnswer('hero', '外出が好き')">外出が好き</button>
+        <button class="choice-btn" onclick="selectAnswer('hime', '家が好き')">家が好き</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ メールアドレス取得画面 -->
+  <div class="screen" id="screen-email">
+    <div class="email-card">
+      <div class="email-icon">✉</div>
+      <h2 class="email-title">診断結果を受け取る</h2>
+      <p class="email-desc">メールアドレスをご登録いただくと<br>詳しい診断結果をお届けします。</p>
+
+      <div class="notice">
+        ※ 登録後、自動的に診断結果が表示されます。<br>
+        　 登録しない場合は下のスキップをご利用ください。
+      </div>
+
+      <div class="asmeru-form-wrap">
+        <form id="asmeru-form" name="asumeru_form" method="post" action="https://1lejend.com/stepmail/kd.php?no=fcftuk" target="asmeru-dummy">
+          <fieldset>
+            <label for="touroku_mail">メールアドレス <span class="require">※</span></label>
+            <input type="email" name="touroku_mail" id="touroku_mail" placeholder="example@email.com" value="" required />
+            <input type="hidden" name="no" value="fcftuk" />
+            <input type="hidden" name="action" value="kakunin" />
+            <p class="center-text">
+              <input type="submit" name="submit" value="登録する" id="confirmBtn" />
+            </p>
+          </fieldset>
+        </form>
+      </div>
+      <!-- フォームのPOST先として使うダミーiframe（非表示） -->
+      <iframe id="asmeru-iframe" name="asmeru-dummy" style="display:none;"></iframe>
+
+      <button class="skip-btn" id="skipBtn" style="visibility:hidden;" onclick="showResult()">診断結果を見る →</button>
+    </div>
+  </div>
+
+  <!-- ④ 結果画面 -->
+  <div class="screen" id="screen-result">
+    <div class="result-card">
+      <span class="result-label">Your Type</span>
+      <div class="result-type" id="resultType">—</div>
+      <div class="result-subtitle" id="resultAnswer"></div>
+      <div class="result-divider"></div>
+      <p class="result-desc" id="resultDesc"></p>
+      <button class="btn-retry" onclick="resetAll()">もう一度診断する</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// 診断データ
+// ============================================================
+const RESULTS = {
+  hero: {
+    type: 'ヒーロー',
+    answer: '外出が好き',
+    desc: 'あなたはヒーロータイプです。行動力があり、外の世界に活力を見出します。パートナーシップでは、ともに冒険し成長していくことを大切にします。'
+  },
+  hime: {
+    type: '姫',
+    answer: '家が好き',
+    desc: 'あなたは姫タイプです。安心できる空間と深い絆を大切にします。パートナーシップでは、温かく包み込む愛情で関係を育てていきます。'
+  }
+};
+
+// ============================================================
+// 画面遷移
+// ============================================================
+function goTo(screenName) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screenName).classList.add('active');
+  updateSteps(screenName);
+  window.scrollTo(0, 0);
+}
+
+function updateSteps(screen) {
+  const map = { top: 0, question: 1, email: 2, result: 3 };
+  const current = map[screen] || 0;
+  ['dot1','dot2','dot3'].forEach((id, i) => {
+    const dot = document.getElementById(id);
+    dot.className = 'step-dot';
+    if (i + 1 < current) dot.classList.add('done');
+    else if (i + 1 === current) dot.classList.add('active');
+  });
+}
+
+// ============================================================
+// 回答選択
+// ============================================================
+function selectAnswer(type, label) {
+  // ★ localStorageに結果を保存（リダイレクト後も復元できるように）
+  const result = RESULTS[type];
+  localStorage.setItem('shindan_result', JSON.stringify({
+    type: result.type,
+    answer: result.answer,
+    desc: result.desc
+  }));
+  goTo('email');
+}
+
+// ============================================================
+// 結果表示
+// ============================================================
+function showResult(data) {
+  // 引数があればそれを使う、なければlocalStorageから復元
+  const result = data || JSON.parse(localStorage.getItem('shindan_result'));
+  if (!result) {
+    goTo('top');
+    return;
+  }
+  document.getElementById('resultType').textContent = result.type;
+  document.getElementById('resultAnswer').textContent = result.answer;
+  document.getElementById('resultDesc').textContent = result.desc;
+  goTo('result');
+
+  // 表示が終わったらlocalStorageをクリア
+  localStorage.removeItem('shindan_result');
+}
+
+// ============================================================
+// リセット
+// ============================================================
+function resetAll() {
+  localStorage.removeItem('shindan_result');
+  goTo('top');
+}
+
+// ============================================================
+// ページ読み込み時の処理
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+
+  // ★パターンB対応：親ページごとリダイレクトされた場合
+  // URLに ?registered=true が付いていたら結果を復元して表示
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('registered') === 'true') {
+    const saved = localStorage.getItem('shindan_result');
+    if (saved) {
+      try {
+        showResult(JSON.parse(saved));
+      } catch(e) {
+        localStorage.removeItem('shindan_result');
+        goTo('top');
+      }
+    } else {
+      goTo('top');
+    }
+    // URLからパラメータを消す（見た目をきれいに）
+    window.history.replaceState({}, '', window.location.pathname);
+    return;
+  }
+
+  // フォームのsubmitイベントを監視
+  // 送信されたらダミーiframeにPOSTし、ボタンを表示する
+  const form = document.getElementById('asmeru-form');
+  const dummyIframe = document.getElementById('asmeru-iframe');
+  const skipBtn = document.getElementById('skipBtn');
+
+  if (form) {
+    form.addEventListener('submit', () => {
+      // 送信後にダミーiframeのloadを待ってボタン表示
+      if (dummyIframe) {
+        dummyIframe.addEventListener('load', () => {
+          if (skipBtn) skipBtn.style.visibility = 'visible';
+        }, { once: true });
+      } else {
+        // ダミーiframeがなくてもタイマーでボタン表示（フォールバック）
+        setTimeout(() => {
+          if (skipBtn) skipBtn.style.visibility = 'visible';
+        }, 2000);
+      }
+    });
+  }
+
+});
+</script>
+
+</body>
+</html>
